@@ -36,6 +36,7 @@ import {
   assignBerths,
   saveBookingToStorage,
 } from "@/lib/booking/booking-engine";
+import { enqueueBooking } from "@/lib/data/sync-queue";
 import { formatTimeWithDay } from "@/lib/format";
 import { useApp, useAppDispatch } from "@/context/app-context";
 import {
@@ -420,9 +421,12 @@ export function TrainBookingDialog({
         berth: berthInfo.berths.join(", "),
         platform: leg.platform || "Platform TBA",
       })),
+      syncStatus: typeof navigator !== "undefined" && !navigator.onLine ? "pending" : "synced",
+      isPendingSync: typeof navigator !== "undefined" && !navigator.onLine,
     };
 
     dispatch({ type: "ADD_TRIP", trip: newTrip });
+    enqueueBooking(newTrip);
     saveBookingToStorage(newTrip);
 
     setConfirmedTrip(newTrip);

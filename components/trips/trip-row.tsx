@@ -84,6 +84,8 @@ export function TripRow({ trip, onViewBooking, isEarlier = false }: TripRowProps
             departureTime={segment.departureTime}
             arrivalTime={segment.arrivalTime}
             tripStatus={trip.status}
+            syncStatus={trip.syncStatus}
+            isPendingSync={trip.isPendingSync}
             showDetail={false}
           />
         </div>
@@ -133,6 +135,8 @@ export function TripRow({ trip, onViewBooking, isEarlier = false }: TripRowProps
             departureTime={segment.departureTime}
             arrivalTime={segment.arrivalTime}
             tripStatus={trip.status}
+            syncStatus={trip.syncStatus}
+            isPendingSync={trip.isPendingSync}
           />
         </div>
 

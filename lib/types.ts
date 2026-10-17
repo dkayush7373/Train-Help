@@ -100,6 +100,8 @@ export interface Trip {
   recoveredAlternativeId?: string;
   refund?: RefundInfo;
   onTimeNote?: string;
+  syncStatus?: "synced" | "pending" | "failed";
+  isPendingSync?: boolean;
 }
 
 export interface Alternative {
@@ -291,7 +293,9 @@ export type AppAction =
   | { type: "SUBMIT_VIBE_FEEDBACK"; feedback: VibeFeedback }
   | { type: "SET_CHAT_INPUT"; value: string }
   | { type: "SET_THEME"; theme: AppTheme }
-  | { type: "HYDRATE_STATE"; state: Partial<AppState> };
+  | { type: "HYDRATE_STATE"; state: Partial<AppState> }
+  | { type: "MARK_TRIPS_SYNCED"; tripIds: string[] }
+  | { type: "UPDATE_TRIP_SYNC_STATUS"; tripId: string; syncStatus: "synced" | "pending" | "failed" };
 
 // ─── Context ───────────────────────────────────────────────────────
 

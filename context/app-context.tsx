@@ -32,6 +32,8 @@ import {
   isTableMissing,
 } from "@/lib/data";
 import { getTodayIST, formatISTDate, type JourneyItinerary } from "@/lib/journeys";
+import { useOnlineStatus } from "@/lib/hooks/use-online-status";
+import { processSyncQueue, getPendingSyncs } from "@/lib/data/sync-queue";
 
 const initialState: AppState = {
   trips: [],
@@ -165,6 +167,31 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, theme: action.theme };
     case "HYDRATE_STATE":
       return { ...state, ...action.state };
+    case "MARK_TRIPS_SYNCED": {
+      const syncedSet = new Set(action.tripIds);
+      return {
+        ...state,
+        trips: state.trips.map((t) =>
+          syncedSet.has(t.id)
+            ? { ...t, syncStatus: "synced" as const, isPendingSync: false }
+            : t
+        ),
+      };
+    }
+    case "UPDATE_TRIP_SYNC_STATUS": {
+      return {
+        ...state,
+        trips: state.trips.map((t) =>
+          t.id === action.tripId
+            ? {
+                ...t,
+                syncStatus: action.syncStatus,
+                isPendingSync: action.syncStatus === "pending",
+              }
+            : t
+        ),
+      };
+    }
     default:
       return state;
   }
@@ -198,11 +225,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         if (dbTrips.length > 0) {
           const appTrips = dbTrips.map((t) => dbTripToAppTrip(t));
+          // Preserve optimistic local trips awaiting sync confirmation
+          const pendingSyncs = getPendingSyncs();
+          const pendingTrips: Trip[] = [];
+          for (const s of pendingSyncs) {
+            const trip = s.payload.trip;
+            if (
+              trip &&
+              !appTrips.some(
+                (dbT) => dbT.id === trip.id || (Boolean(trip.pnr) && dbT.pnr === trip.pnr)
+              )
+            ) {
+              pendingTrips.push(trip);
+            }
+          }
+
+          const mergedTrips = [...pendingTrips, ...appTrips];
           dispatch({
             type: "HYDRATE_STATE",
             state: {
-              trips: appTrips,
-              selectedTripId: appTrips[0]?.id ?? null,
+              trips: mergedTrips,
+              selectedTripId: mergedTrips[0]?.id ?? null,
             },
           });
         }
@@ -232,6 +275,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(() => savePersistedState(state), 250);
     return () => clearTimeout(timer);
   }, [state]);
+
+  const isOnline = useOnlineStatus();
+
+  // Process offline mutation sync queue when transitioning to online
+  useEffect(() => {
+    if (!isOnline) return;
+
+    let active = true;
+    async function triggerSync() {
+      const pending = getPendingSyncs();
+      if (pending.length === 0) return;
+
+      try {
+        const result = await processSyncQueue();
+        if (!active) return;
+
+        if (result.synced > 0) {
+          const syncedTripIds = pending
+            .map((p) => p.payload.trip?.id)
+            .filter(Boolean) as string[];
+
+          if (syncedTripIds.length > 0) {
+            dispatch({ type: "MARK_TRIPS_SYNCED", tripIds: syncedTripIds });
+          }
+        }
+      } catch (err) {
+        console.warn("Failed processing sync queue:", err);
+      }
+    }
+
+    triggerSync();
+    return () => {
+      active = false;
+    };
+  }, [isOnline]);
 
   // Synchronize theme to document root
   useEffect(() => {

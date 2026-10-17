@@ -8,6 +8,8 @@ interface TrainStatusBadgeProps {
   departureTime: Date | string | number;
   arrivalTime: Date | string | number;
   tripStatus?: TripStatus;
+  syncStatus?: "synced" | "pending" | "failed";
+  isPendingSync?: boolean;
   showDetail?: boolean;
   className?: string;
 }
@@ -16,12 +18,27 @@ export function TrainStatusBadge({
   departureTime,
   arrivalTime,
   tripStatus,
+  syncStatus,
+  isPendingSync,
   showDetail = false,
   className = "",
 }: TrainStatusBadgeProps) {
   const opStatus: TrainOperationalStatus = useMemo(() => {
     return classifyTrainOperationalStatus(departureTime, arrivalTime);
   }, [departureTime, arrivalTime]);
+
+  // Offline mutation queue sync indicator
+  if (syncStatus === "pending" || isPendingSync) {
+    return (
+      <div
+        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[11px] font-semibold tracking-wide bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 animate-pulse ${className}`}
+        title="Saved offline in local transaction queue. Syncing upon network availability."
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" aria-hidden="true" />
+        <span>Saved offline - syncing...</span>
+      </div>
+    );
+  }
 
   // If explicitly cancelled, cancellation badge takes priority
   if (tripStatus === "cancelled") {

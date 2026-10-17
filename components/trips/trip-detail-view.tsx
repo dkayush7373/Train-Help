@@ -133,6 +133,8 @@ export function TripDetailView({ tripId }: TripDetailViewProps) {
               departureTime={segment.departureTime}
               arrivalTime={segment.arrivalTime}
               tripStatus={trip.status}
+              syncStatus={trip.syncStatus}
+              isPendingSync={trip.isPendingSync}
               showDetail={true}
             />
           </div>

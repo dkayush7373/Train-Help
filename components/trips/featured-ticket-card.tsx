@@ -22,9 +22,15 @@ export function FeaturedTicketCard({ trip, onViewBooking }: FeaturedTicketCardPr
       {/* Top Meta Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-disruption/20 text-xs">
         <div className="flex items-center gap-2">
-          <span className="micro-label text-disruption font-semibold tracking-wider">
-            {isCancelled ? "NEEDS ATTENTION · CANCELLED" : "NEEDS ATTENTION · DELAYED"}
-          </span>
+          {trip.syncStatus === "pending" || trip.isPendingSync ? (
+            <span className="micro-label text-amber-600 dark:text-amber-400 font-semibold tracking-wider animate-pulse">
+              SAVED OFFLINE · SYNCING...
+            </span>
+          ) : (
+            <span className="micro-label text-disruption font-semibold tracking-wider">
+              {isCancelled ? "NEEDS ATTENTION · CANCELLED" : "NEEDS ATTENTION · DELAYED"}
+            </span>
+          )}
           <span className="text-muted-foreground">•</span>
           <span className="font-mono text-muted-foreground">
             PNR {trip.pnr}

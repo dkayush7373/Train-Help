@@ -14,3 +14,4 @@ export * from "./trips";
 export * from "./scenarios";
 export * from "./advisories";
 export * from "./adapters";
+export * from "./sync-queue";
