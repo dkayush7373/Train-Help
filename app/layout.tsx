@@ -49,7 +49,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${inter.variable} ${newsreader.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full font-sans bg-background text-foreground">
+      <body
+        suppressHydrationWarning
+        className="min-h-full font-sans bg-background text-foreground"
+      >
         <OfflineBanner />
         <AuthProvider>
           <AppProvider>

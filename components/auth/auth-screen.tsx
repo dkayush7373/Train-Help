@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Fraunces, DM_Sans, JetBrains_Mono } from "next/font/google";
 import {
   Check,
   Eye,
@@ -15,25 +14,7 @@ import { useAuth } from "@/context/auth-context";
 import { BrandLogo } from "@/components/BrandLogo";
 import styles from "./auth-screen.module.css";
 
-// Scoped Google Fonts
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
 
 export type AuthTab = "sign-in" | "sign-up";
 
@@ -222,11 +203,11 @@ export function AuthScreen({ initialTab = "sign-in" }: AuthScreenProps) {
 
   return (
     <main
-      className={`${styles.root} ${fraunces.className}`}
+      className={styles.root}
       style={{
-        ["--font-heading" as string]: fraunces.style.fontFamily,
-        ["--font-body" as string]: dmSans.style.fontFamily,
-        ["--font-mono" as string]: jetbrainsMono.style.fontFamily,
+        ["--font-heading" as string]: "var(--font-display, 'Newsreader', 'Fraunces', Georgia, serif)",
+        ["--font-body" as string]: "var(--font-sans, 'Inter', system-ui, sans-serif)",
+        ["--font-mono" as string]: "var(--font-mono, 'JetBrains Mono', monospace)",
       }}
     >
       <div className={styles.container}>
